@@ -11,7 +11,7 @@
 int main(int argc, char** argv) {
   int port = 3899;
   char filename[] = "testfile";
-  DecafsClient client("10.0.0.100", port, 2);
+  DecafsClient client(argv[0], port, 2);
   client.openConnection();
 
   sleep(1);
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
   int bytes_written = client.write(fd, testwrite, strlen(testwrite));
   std::cout << "write returned: " << bytes_written << std::endl;
   sleep(1);
-  
+
   // WRITE
   std::cout << "------------ DECAFS CLIENT WRITE (0) TEST ----------" << std::endl;
   bytes_written = client.write(fd, testwrite, 0);
@@ -47,13 +47,13 @@ int main(int argc, char** argv) {
   int close = client.close(fd);
   std::cout << "close returned: " << close << std::endl;
   sleep(1);
-  
+
   // OPEN
   std::cout << "------------ DECAFS CLIENT OPEN TEST ----------" << std::endl;
   fd = client.open(filename, O_RDWR);
   std::cout << "open returned: " << fd << std::endl;
   sleep(1);
-  
+
   // READ
   std::cout << "------------ DECAFS CLIENT READ (0) TEST ----------" << std::endl;
   bytes_read = client.read(fd, testread, 0);
@@ -65,13 +65,13 @@ int main(int argc, char** argv) {
   bytes_read = client.read(fd, testread, strlen(testwrite));
   std::cout << "read returned: " << bytes_read << std::endl;
   sleep(1);
- 
+
   // CLOSE
   std::cout << "------------ DECAFS CLIENT CLOSE TEST ----------" << std::endl;
   close = client.close(fd);
   std::cout << "close returned: " << close << std::endl;
   sleep(1);
-  
+
   // FILE STORAGE STAT
   std::cout << "------------ DECAFS CLIENT FILE STORAGE STAT TEST ----------" << std::endl;
   client.file_storage_stat(filename);
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
   fd = client.open(filename, O_RDWR);
   std::cout << "open returned: " << fd << std::endl;
   sleep(1);
-  
+
   // SEEK
   std::cout << "------------ DECAFS CLIENT SEEK TEST ----------" << std::endl;
   int offset = client.lseek(fd, 7, SEEK_SET);
@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
   bytes_written = client.write(fd, char_write, strlen(char_write));
   std::cout << "write returned: " << bytes_written << std::endl;
   sleep(1);
-  
+
   // SEEK
   std::cout << "------------ DECAFS CLIENT SEEK TEST ----------" << std::endl;
   offset = client.lseek(fd, 0, SEEK_SET);
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
   bytes_read = client.read(fd, testread, strlen(testwrite));
   std::cout << "read returned: " << bytes_read << std::endl;
   sleep(1);
-  
+
   // CLOSE
   std::cout << "------------ DECAFS CLIENT CLOSE TEST ----------" << std::endl;
   close = client.close(fd);
