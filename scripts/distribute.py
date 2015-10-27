@@ -47,8 +47,8 @@ for node in data["espresso"]:
   espresso_nodes.append(node)
   espresso_ips.append(node["ip"])
 
-print "Copying ../bin/decafs_barsta to " + ip  + ":~/decafs_barista"
 ip = barista_ip
+print "Copying ../bin/decafs_barsta to " + ip  + ":~/decafs_barista"
 proc = subprocess.Popen(["scp", "../bin/decafs_barista", ip + ":~/decafs_barista"], stdin=open(os.devnull), stdout=sys.stdout, stderr=sys.stderr)
 proc.communicate()
 
