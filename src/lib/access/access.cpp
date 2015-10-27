@@ -28,7 +28,6 @@ string makeKeyStr(int file_id, int chunk_num) {
 ssize_t process_read_chunk (uint32_t request_id, int fd, int file_id,
                             int node_id, int stripe_id, int chunk_num,
                             int offset, void* buf, int count) {
-  std::cout << "the thing is happening :)" << std::endl;
   //string key = makeKeyStr(file_id, chunk_num);
   //std::cout << "KEY: " << key << std::endl;
   /*if (cache.count(key) > 0) {
