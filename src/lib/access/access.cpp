@@ -4,13 +4,13 @@
 #include <string>
 #include <algorithm>
 #define CACHE_SIZE 10
-
+/*
 typedef struct Info {
  void * data;
  int count;
 } Info;
-
-unordered_map<string, Info> cache;
+*/
+//unordered_map<string, Info> cache;
 
 string makeKeyStr(int file_id, int chunk_num) {
   char temp[15];
