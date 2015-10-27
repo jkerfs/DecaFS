@@ -66,9 +66,6 @@ ssize_t process_write_chunk (uint32_t request_id, int fd, int file_id,
   char* base = &((cache[key])[offset]);
   memcpy(base, buf, count);
 
-  WriteChunkResponse writeResponse(request_id, fd, file_id, stripe_id, chunk_num, offset, count);
-  write_response_handler(&writeResponse);
-
   return network_write_chunk (request_id, fd, file_id, node_id, stripe_id,
                               chunk_num, offset, buf, count);
 }
