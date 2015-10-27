@@ -11,7 +11,7 @@
 int main(int argc, char** argv) {
   int port = 3899;
   char filename[] = "testfile";
-  DecafsClient client(argv[0], port, 2);
+  DecafsClient client(argv[1], port, 2);
   client.openConnection();
 
   sleep(1);
