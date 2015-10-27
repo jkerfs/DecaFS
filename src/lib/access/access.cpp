@@ -18,12 +18,12 @@ string makeKeyStr(int file_id, int chunk_num) {
   return std::string(temp);
 }
 
-void printHead(char *str, int count) {
+/*void printHead(char *str, int count) {
   for (int i = 0; i < count; i++) {
    std::cout << std::hex << (int)str[i];
   }
   std::cout << std::endl;
-}
+}*/
 
 ssize_t process_read_chunk (uint32_t request_id, int fd, int file_id,
                             int node_id, int stripe_id, int chunk_num,
@@ -34,7 +34,7 @@ ssize_t process_read_chunk (uint32_t request_id, int fd, int file_id,
     Info res = cache[key];
     std::cout << "FOUND " << std::endl;
     if (res.count >= count) {
-     printHead(res.data, std::min(10, count));
+     //printHead(res.data, std::min(10, count));
      memcpy(buf, res.data, count*sizeof(uint8_t));
      std::cout << "Retrieved from cache!" << std::endl;
      return count;
@@ -52,7 +52,7 @@ ssize_t process_write_chunk (uint32_t request_id, int fd, int file_id,
 
   if (cache.size() >= CACHE_SIZE) {
     std::cout << "REMOVING " << cache.begin()->first << std::endl;
-    free((cache.begin()->first).data);
+    //free((void*)((cache.begin()->first).data));
     cache.erase(cache.begin());
   }
   void * temp = calloc(sizeof(uint8_t), count);
@@ -69,8 +69,8 @@ ssize_t process_delete_chunk (uint32_t request_id, int file_id, int node_id,
                               int stripe_id, int chunk_num) {
   std::string key = makeKeyStr(file_id, chunk_num);
   auto it = cache.find(key);
-  if (it == cache.end()) {
-    free((it->first).data);
+  if (it != cache.end()) {
+    //free((it->first).data);
     cache.erase(it);
   }
 
