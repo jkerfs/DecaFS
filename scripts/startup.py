@@ -13,8 +13,8 @@ from subprocess import PIPE, Popen
 
 fp = open('output', 'w')
 
-decaf_b_path = '/root/decafs/runtime/decafs_barista'
-decaf_e_path = '/root/decafs/runtime/decafs_espresso'
+decaf_b_path = './decafs_barista'
+decaf_e_path = './decafs_espresso'
 
 
 def preexec_function(): pass
