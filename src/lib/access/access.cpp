@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <string>
 #include <algorithm>
+#include <cstdlib>
 
-#define CACHE_SIZE 10
-
+unsigned int CACHE_SIZE = atoi(getenv("CACHE_SIZE"));
+int USE_CACHE = atoi(getenv("USE_CACHE"));
 
 unordered_map<string, char *> cache;
 
@@ -20,23 +21,28 @@ ssize_t process_read_chunk (uint32_t request_id, int fd, int file_id,
                             int node_id, int stripe_id, int chunk_num,
                             int offset, void* buf, int count) {
 
- //compute the key for the given file, stripe and chunk
-  string key = makeKeyStr(file_id, stripe_id, chunk_num);
-  std::cout << "KEY: " << key << std::endl;
+  std::cout << "Cache size: " << CACHE_SIZE << std::endl;
+  std::cout << "Use cahce: " << USE_CACHE << std::endl;
 
-  if (cache.count(key)) {
-    std::cout << "FOUND " << std::endl;
+  if (USE_CACHE) {
+    //compute the key for the given file, stripe and chunk
+    string key = makeKeyStr(file_id, stripe_id, chunk_num);
+    std::cout << "KEY: " << key << std::endl;
 
-    char* base = &((cache[key])[offset]);
+    if (cache.count(key)) {
+      std::cout << "FOUND " << std::endl;
 
-    ReadChunkResponse readResponse(request_id, fd, file_id, stripe_id, chunk_num, offset, count, (uint8_t*)base);
+      char* base = &((cache[key])[offset]);
 
-     read_response_handler(&readResponse);
+      ReadChunkResponse readResponse(request_id, fd, file_id, stripe_id, chunk_num, offset, count, (uint8_t*)base);
 
-     std::cout << "Retrieved from cache!" << std::endl;
-     std::cout << base << std::endl;
+       read_response_handler(&readResponse);
 
-     return 1;
+       std::cout << "Retrieved from cache!" << std::endl;
+       std::cout << base << std::endl;
+
+       return 1;
+    }
   }
 
   return network_read_chunk (request_id, fd, file_id, node_id, stripe_id,
@@ -47,24 +53,26 @@ ssize_t process_write_chunk (uint32_t request_id, int fd, int file_id,
                              int node_id, int stripe_id, int chunk_num,
                              int offset, void *buf, int count) {
 
-  // Remove an element from cache if cache is full
-  if (cache.size() >= CACHE_SIZE) {
-    std::cout << "REMOVING element from Cache" << std::endl;
-    free(cache.begin()->second);
-    cache.erase(cache.begin());
+  if (USE_CACHE) {
+    // Remove an element from cache if cache is full
+    if (cache.size() >= CACHE_SIZE) {
+      std::cout << "REMOVING element from Cache" << std::endl;
+      free(cache.begin()->second);
+      cache.erase(cache.begin());
+    }
+
+    //compute the key for the given file, stripe and chunk
+    string key = makeKeyStr(file_id, stripe_id, chunk_num);
+
+    // allocate memory to store chunk
+    if (!cache.count(key)) {
+      cache[key] = (char*) malloc(MAX_CHUNK);
+    }
+
+    //copy chunk to cache at specific key and offset
+    char* base = &((cache[key])[offset]);
+    memcpy(base, buf, count);
   }
-
-  //compute the key for the given file, stripe and chunk
-  string key = makeKeyStr(file_id, stripe_id, chunk_num);
-
-  // allocate memory to store chunk
-  if (!cache.count(key)) {
-    cache[key] = (char*) malloc(MAX_CHUNK);
-  }
-
-  //copy chunk to cache at specific key and offset
-  char* base = &((cache[key])[offset]);
-  memcpy(base, buf, count);
 
   return network_write_chunk (request_id, fd, file_id, node_id, stripe_id,
                               chunk_num, offset, buf, count);
@@ -73,14 +81,15 @@ ssize_t process_write_chunk (uint32_t request_id, int fd, int file_id,
 
 ssize_t process_delete_chunk (uint32_t request_id, int file_id, int node_id,
                               int stripe_id, int chunk_num) {
+   if (USE_CACHE) {
+    //compute the key for the given file, stripe and chunk
+    string key = makeKeyStr(file_id, stripe_id, chunk_num);
 
-  //compute the key for the given file, stripe and chunk
-  string key = makeKeyStr(file_id, stripe_id, chunk_num);
-
-  //free memory and remove chunk from cache if it exists
-  if (cache.count(key)) {
-    free(cache.find(key)->second);
-    cache.erase(key);
+    //free memory and remove chunk from cache if it exists
+    if (cache.count(key)) {
+      free(cache.find(key)->second);
+      cache.erase(key);
+    }
   }
 
   return network_delete_chunk (request_id, file_id, node_id, stripe_id, chunk_num);

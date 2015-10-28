@@ -1,4 +1,3 @@
-
 #include "network_core/barista_server.h"
 #include "network_core/espresso_client.h"
 #include "../decafs_barista/decafs_barista.h"
@@ -11,7 +10,7 @@
 int main(int argc, char** argv) {
   int port = 3899;
   char filename[] = "testfile";
-  DecafsClient client(argv[1], port, 2);
+  DecafsClient client("10.0.0.100", port, 2);
   client.openConnection();
 
   sleep(1);
@@ -123,7 +122,6 @@ int main(int argc, char** argv) {
   std::cout << "------------ DECAFS CLIENT DELETE TEST ----------" << std::endl;
   client.remove_file(filename);
   sleep(1);
-
   // FILE STORAGE STAT
   std::cout << "------------ DECAFS CLIENT FILE STORAGE STAT TEST ----------" << std::endl;
   client.file_storage_stat(filename);
