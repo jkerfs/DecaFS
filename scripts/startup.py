@@ -13,7 +13,13 @@ from subprocess import PIPE, Popen
 
 fp = open('output', 'w')
 
+decaf_b_path = '/root/decafs/DecaFS-master/bin/decafs_barista'
+decaf_e_path = '/root/decafs/DecaFS-master/bin/decafs_espresso'
+
+
 def preexec_function(): pass
+
+
 
 # setup cmd line args
 parser = argparse.ArgumentParser(description='startup script for DecaFS')
@@ -69,7 +75,7 @@ e_procs=[]
 ip = barista_node["ip"]
 metadata = barista_node["metadata"]
 print("executing decafs_barista on " + ip)
-b_proc = subprocess.Popen(["ssh", "-t", "-t", ip, "./decafs_barista", barista_args], stdout=sys.stdout, stderr=sys.stderr)
+b_proc = subprocess.Popen(["/root/decafs/runtime/decafs_barista", str(stripe_size), str(chunk_size), barista_node(["metadata"], str(len(espresso_nodes)), str(system_port)], stdout=sys.stdout, stderr=sys.stderr)
 
 time.sleep(1)
 
@@ -81,7 +87,7 @@ for (i, node) in enumerate(espresso_nodes):
    filesystem = node["filesystem"]
 
    print("executing decafs_espresso on " + ip)
-   e_procs.append(subprocess.Popen(["ssh", "-t", "-t", ip, "./decafs_espresso", node_id, metadata, filesystem, barista_ip, system_port], stdin=open(os.devnull), stdout=sys.stdout, stderr=sys.stderr))
+   e_procs.append(subprocess.Popen(["ssh", "-t", "-t", ip, decaf_e_path, node_id, metadata, filesystem, barista_ip, system_port], stdin=open(os.devnull), stdout=sys.stdout, stderr=sys.stderr))
 
 b_proc.communicate()
 print("decafs_barista exited")
