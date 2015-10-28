@@ -13,8 +13,8 @@ from subprocess import PIPE, Popen
 
 fp = open('output', 'w')
 
-decaf_b_path = '/root/decafs/DecaFS-master/bin/decafs_barista'
-decaf_e_path = '/root/decafs/DecaFS-master/bin/decafs_espresso'
+decaf_b_path = '/root/decafs/runtime/decafs_barista'
+decaf_e_path = '/root/decafs/runtime/decafs_espresso'
 
 
 def preexec_function(): pass
@@ -34,6 +34,20 @@ parser.add_argument('--config',
                     type=str,
                     required='True',
                     help='set this flag if a new instance of DecaFS')
+
+parser.add_argument('--useCache',
+		    '-uc',
+		    default="0",
+	            type=str,
+		    help='set this flag to enable or disable cache')
+
+parser.add_argument('--cacheSize',
+		    '-cs',
+		    default="10",
+	            type=str,
+		    help='set cache size')
+
+
 
 args = parser.parse_args()
 
@@ -75,7 +89,7 @@ e_procs=[]
 ip = barista_node["ip"]
 metadata = barista_node["metadata"]
 print("executing decafs_barista on " + ip)
-b_proc = subprocess.Popen(["/root/decafs/runtime/decafs_barista", str(stripe_size), str(chunk_size), barista_node(["metadata"], str(len(espresso_nodes)), str(system_port)], stdout=sys.stdout, stderr=sys.stderr)
+b_proc = subprocess.Popen(["ssh", "-t", "-t", ip, "USE_CACHE=" + args.useCache, "CACHE_SIZE=" + args.cacheSize, decaf_b_path, barista_args], stdout=sys.stdout, stderr=sys.stderr)
 
 time.sleep(1)
 
