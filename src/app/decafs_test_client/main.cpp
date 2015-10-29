@@ -9,11 +9,18 @@
 
 int main(int argc, char** argv) {
   int port = 3899;
-  char filename[] = "testfile";
+  char * filenames[10];
+  int j;
+  for (j = 0; j < 10; j++) {
+    char * temp = (char*)calloc(8, sizeof(char));
+    sprintf(temp, "file%d", j);
+    filenames[j] = temp;
+  }
+
   DecafsClient client(argv[1] , port, 2);
   client.openConnection();
 
-  int N = 100000;
+  int N = 100;
   char* testwrite = (char*)calloc(N, sizeof(char));
   int i;
   for (i = 0; i < N - 1; i++) {
@@ -23,43 +30,40 @@ int main(int argc, char** argv) {
 
   sleep(1);
 
-  // OPEN
-  std::cout << "------------ DECAFS CLIENT OPEN TEST ----------" << std::endl;
-  int fd = client.open(filename, O_RDWR);
-  std::cout << "open returned: " << fd << std::endl;
-  sleep(1);
+  int fd, bytes_written, bytes_read, close;
+  for(j = 0; j < 10; j++) {
+    // OPEN
+    fd = client.open(filenames[j], O_RDWR);
+    sleep(1);
 
-  // WRITE
-  std::cout << "------------ DECAFS CLIENT WRITE TEST ----------" << std::endl;
-  int bytes_written = client.write(fd, testwrite, strlen(testwrite));
-  std::cout << "write returned: " << bytes_written << std::endl;
-  sleep(10);
+    // WRITE
+    std::cout << "------------ DECAFS CLIENT WRITE TEST ----------" << std::endl;
+    bytes_written = client.write(fd, testwrite, strlen(testwrite));
+    std::cout << "write returned: " << bytes_written << std::endl;
+    sleep(3);
 
-  // CLOSE
-  std::cout << "------------ DECAFS CLIENT CLOSE TEST ----------" << std::endl;
-  int close = client.close(fd);
-  std::cout << "close returned: " << close << std::endl;
-  sleep(1);
+    // CLOSE
+    close = client.close(fd);
+    sleep(1);
+  }
 
-  // OPEN
-  std::cout << "------------ DECAFS CLIENT OPEN TEST ----------" << std::endl;
-  fd = client.open(filename, O_RDWR);
-  std::cout << "open returned: " << fd << std::endl;
-  sleep(1);
+  for(j = 0; j < 10; j++) {
+    // OPEN
+    fd = client.open(filenames[j], O_RDWR);
+    sleep(1);
 
-  // READ
-  std::cout << "------------ DECAFS CLIENT READ TEST ----------" << std::endl;
-  char * testread = (char *)calloc(N, sizeof(char));
-  int bytes_read = client.read(fd, testread, strlen(testwrite));
-  std::cout << "read returned: " << bytes_read << std::endl;
-  std::cout << testread << std::endl;
-  sleep(10);
+    // READ
+    std::cout << "------------ DECAFS CLIENT READ TEST ----------" << std::endl;
+    char * testread = (char *)calloc(N, sizeof(char));
+    bytes_read = client.read(fd, testread, strlen(testwrite));
+    std::cout << "read returned: " << bytes_read << std::endl;
+    std::cout << testread << std::endl;
+    sleep(3);
 
-  // CLOSE
-  std::cout << "------------ DECAFS CLIENT CLOSE TEST ----------" << std::endl;
-  close = client.close(fd);
-  std::cout << "close returned: " << close << std::endl;
-  sleep(1);
+    // CLOSE
+    close = client.close(fd);
+    sleep(1);
+  }
 
   return 0;
 }
