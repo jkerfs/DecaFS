@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     std::cout << "------------ DECAFS CLIENT WRITE TEST ----------" << std::endl;
     bytes_written = client.write(fd, testwrite, strlen(testwrite));
     std::cout << "write returned: " << bytes_written << std::endl;
-    sleep(3);
+    sleep(1);
 
     // CLOSE
     close = client.close(fd);
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     bytes_read = client.read(fd, testread, strlen(testwrite));
     std::cout << "read returned: " << bytes_read << std::endl;
     std::cout << testread << std::endl;
-    sleep(3);
+    sleep(1);
 
     // CLOSE
     close = client.close(fd);
