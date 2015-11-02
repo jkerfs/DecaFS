@@ -20,13 +20,13 @@ uint32_t IO_Manager::process_read_stripe (uint32_t request_id, uint32_t file_id,
                                           size_t count) {
   uint32_t chunk_id, bytes_read = 0, read_size = 0, num_chunks = 0;
   int chunk_offset, chunk_result, node_id;
-  
+
   assert (((int)count - offset) <= (int)stripe_size);
-  
+
   printf ("\n(BARISTA) Process Read Stripe\n");
 
   get_first_chunk (&chunk_id, chunk_size, &chunk_offset, offset);
-  
+
   while (bytes_read < count) {
     struct file_chunk cur_chunk = {file_id, stripe_id, chunk_id};
 
@@ -45,7 +45,7 @@ uint32_t IO_Manager::process_read_stripe (uint32_t request_id, uint32_t file_id,
       assert (chunk_replica_exists (cur_chunk));
       node_id = chunk_to_replica_node[cur_chunk];
     }
-   
+
     // Determine how much data to read from the current chunk
     if (count - bytes_read > chunk_size - chunk_offset) {
       read_size = chunk_size - chunk_offset;
@@ -53,16 +53,16 @@ uint32_t IO_Manager::process_read_stripe (uint32_t request_id, uint32_t file_id,
     else {
       read_size = count - bytes_read;
     }
-    
+
     printf ("\tprocessing chunk %d (sending to node %d)\n", chunk_id, node_id);
     printf ("\t\toffset: %d, size: %d\n", chunk_offset, read_size);
     // Send the read to the node
                    // ADD FD HERE
     chunk_result = process_read_chunk (request_id, 0, file_id, node_id, stripe_id,
-                                      chunk_id, chunk_offset, 
+                                      chunk_id, chunk_offset,
                                       (uint8_t *)buf + bytes_read,
                                       read_size);
-    
+
     printf ("\t\treceived %d from network call.\n", chunk_result);
     // If the node cannot be read from
     if (chunk_result == NODE_FAILURE) {
@@ -94,12 +94,12 @@ void IO_Manager::process_write_stripe (uint32_t request_id,
 
   assert (((int)count - offset) <= (int)stripe_size);
   printf ("\n(BARISTA) Process Write Stripe\n");
-  
+
   get_first_chunk (&chunk_id, chunk_size, &chunk_offset, offset);
 
   while (bytes_written < count) {
     struct file_chunk cur_chunk = {file_id, stripe_id, chunk_id};
-    
+
     // If the chunk does not exists, create it
     if (!chunk_exists (cur_chunk)) {
       node_id = put_chunk (file_id, pathname, stripe_id, chunk_id);
@@ -111,7 +111,7 @@ void IO_Manager::process_write_stripe (uint32_t request_id,
     if (!chunk_replica_exists (cur_chunk)) {
       replica_node_id = put_replica (file_id, pathname, stripe_id,
                                      chunk_id);
-      printf ("\tchunk replica doesn't exist. Preparing to send chunk replica to node %d\n", 
+      printf ("\tchunk replica doesn't exist. Preparing to send chunk replica to node %d\n",
                  replica_node_id);
       chunk_to_replica_node[cur_chunk] = replica_node_id;
     }
@@ -137,13 +137,14 @@ void IO_Manager::process_write_stripe (uint32_t request_id,
     printf ("\t\treceived %d from network call.\n", write_result);
     // If the write failed
     if (write_result == NODE_FAILURE) {
+      printf("THe node write failed :(");
       // Set the node to "down" and try again
       set_node_down (node_id);
     }
-    else {
+    //else {
       // Send the write to the replica node
                           // ADD FD HERE
-      printf ("\tprocessing chunk replica %d (sending to node %d)\n", chunk_id, 
+      printf ("\tprocessing chunk replica %d (sending to node %d)\n", chunk_id,
                  replica_node_id);
       write_result = process_write_chunk (replica_request_id, 0, file_id, replica_node_id, stripe_id,
                                           chunk_id, chunk_offset, (uint8_t *)buf
@@ -167,11 +168,11 @@ void IO_Manager::process_write_stripe (uint32_t request_id,
       (*chunks_written)++;
       (*replica_chunks_written)++;
     }
-  }
+  //}
 }
 
 uint32_t IO_Manager::process_delete_file (uint32_t request_id, uint32_t file_id) {
-  std::vector<struct file_chunk> chunks = get_all_chunks (file_id); 
+  std::vector<struct file_chunk> chunks = get_all_chunks (file_id);
   uint32_t num_chunks = 0;
 
   for (std::vector<struct file_chunk>::iterator it = chunks.begin();
@@ -196,10 +197,10 @@ uint32_t IO_Manager::process_delete_file (uint32_t request_id, uint32_t file_id)
   }
   return num_chunks;
 }
-    
+
 char * IO_Manager::process_file_storage_stat (struct decafs_file_stat file_info) {
   stringstream storage_info;
-  std::vector<struct file_chunk> chunks = get_all_chunks (file_info.file_id); 
+  std::vector<struct file_chunk> chunks = get_all_chunks (file_info.file_id);
   int last_stripe = -1;
   bool first_stripe = true;
 
@@ -315,7 +316,7 @@ bool IO_Manager::chunk_replica_exists (struct file_chunk chunk) {
 
 std::vector<struct file_chunk> IO_Manager::get_all_chunks (uint32_t file_id) {
   std::vector <struct file_chunk> chunks;
-  
+
   for (PersistentMap<struct file_chunk, int>::iterator it = chunk_to_node.begin();
   //for (map<struct file_chunk, int>::iterator it = chunk_to_node.begin();
          it != chunk_to_node.end(); it++) {
