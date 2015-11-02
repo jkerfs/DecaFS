@@ -131,15 +131,21 @@ void IO_Manager::process_write_stripe (uint32_t request_id,
     // Send the write to the node
                         // ADD FD HERE
     printf ("\tprocessing chunk %d (sending to node %d)\n", chunk_id, node_id);
-    write_result = process_write_chunk (request_id, 0, file_id, node_id, stripe_id,
-                                        chunk_id, chunk_offset, (uint8_t *)buf
-                                        + bytes_written, write_size);
-    printf ("\t\treceived %d from network call.\n", write_result);
-    // If the write failed
-    if (write_result == NODE_FAILURE) {
-      printf("THe node write failed :(");
-      // Set the node to "down" and try again
-      set_node_down (node_id);
+    if (is_node_up(node_id)) {
+      printf("%d is up :)", node_id);
+      write_result = process_write_chunk (request_id, 0, file_id, node_id, stripe_id,
+                                          chunk_id, chunk_offset, (uint8_t *)buf
+                                          + bytes_written, write_size);
+      printf ("\t\treceived %d from network call.\n", write_result);
+      // If the write failed
+      if (write_result == NODE_FAILURE) {
+        printf("THe node write failed :(");
+        // Set the node to "down" and try again
+        set_node_down (node_id);
+      }
+    }
+    else {
+      printf ("%d is down :(", node_id);
     }
     //else {
       // Send the write to the replica node
