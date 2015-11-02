@@ -2,7 +2,7 @@
 
 import argparse
 import json
-import subprocess 
+import subprocess
 import sys
 import os
 import time
@@ -25,8 +25,8 @@ def preexec_function(): pass
 parser = argparse.ArgumentParser(description='startup script for DecaFS')
 parser.add_argument('--first',
                     '-f',
-                    default=False, 
-                    action='store_true', 
+                    default=False,
+                    action='store_true',
                     help='set this flag if a new instance of DecaFS')
 
 parser.add_argument('--config',
@@ -34,20 +34,6 @@ parser.add_argument('--config',
                     type=str,
                     required='True',
                     help='set this flag if a new instance of DecaFS')
-
-parser.add_argument('--useCache',
-		    '-uc',
-		    default="0",
-	            type=str,
-		    help='set this flag to enable or disable cache')
-
-parser.add_argument('--cacheSize',
-		    '-cs',
-		    default="10",
-	            type=str,
-		    help='set cache size')
-
-
 
 args = parser.parse_args()
 
@@ -89,7 +75,7 @@ e_procs=[]
 ip = barista_node["ip"]
 metadata = barista_node["metadata"]
 print("executing decafs_barista on " + ip)
-b_proc = subprocess.Popen(["ssh", "-t", "-t", ip, "USE_CACHE=" + args.useCache, "CACHE_SIZE=" + args.cacheSize, decaf_b_path, barista_args], stdout=sys.stdout, stderr=sys.stderr)
+b_proc = subprocess.Popen(["ssh", "-t", "-t", ip, decaf_b_path, barista_args], stdout=sys.stdout, stderr=sys.stderr)
 
 time.sleep(1)
 
@@ -107,5 +93,5 @@ b_proc.communicate()
 print("decafs_barista exited")
 
 for proc in e_procs:
-   proc.send_signal(signal.SIGINT) 
+   proc.send_signal(signal.SIGINT)
    proc.wait()
