@@ -139,6 +139,9 @@ void IO_Manager::process_write_stripe (uint32_t request_id,
       printf ("\t\treceived %d from network call.\n", write_result);
       // If the write failed
       if (write_result == NODE_FAILURE) {
+
+        WriteChunkResponse writeResponse(request_id, 0, file_id, stripe_id, chunk_id, chunk_offset, write_size);
+        write_response_handler(&writeResponse);
         printf("THe node write failed :(");
         // Set the node to "down" and try again
         set_node_down (node_id);
