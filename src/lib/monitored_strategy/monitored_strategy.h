@@ -5,6 +5,7 @@
 
 #include "decafs_types/file_types.h"
 #include "decafs_types/ip_address.h"
+#include "access/access.h"
 #include <list>
 
 typedef struct WriteReq {
