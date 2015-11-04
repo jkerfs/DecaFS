@@ -34,6 +34,7 @@ decafs_barista.o: decafs_barista.cpp decafs_barista.h \
  ../../lib/network_core/file_storage_stat_response_packet.h \
  ../../lib/network_core/mkdir_response_packet.h \
  ../../lib/network_core/remove_response_packet.h \
+ ../../lib/monitored_strategy/monitored_strategy.h \
  ../../lib/io_manager/io_manager_c_api.h \
  ../../lib/persistent_metadata/persistent_metadata.h \
  ../../lib/persistent_metadata/persistent_metadata_impl.h \
@@ -41,5 +42,4 @@ decafs_barista.o: decafs_barista.cpp decafs_barista.h \
  ../../lib/monitored_strategy/monitored_strategy_c_api.h \
  ../../lib/network_core/network_packets.h \
  ../../lib/locking_strategy/locking_strategy.h \
- ../../lib/monitored_strategy/monitored_strategy.h \
  ../../lib/network_core/barista_server.h

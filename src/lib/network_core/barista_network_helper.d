@@ -16,14 +16,14 @@ barista_network_helper.o: barista_network_helper.cpp \
  ../../lib/replication_strategy/replication_strategy.h \
  ../../lib/access/access.h \
  ../../lib/network_core/barista_network_helper.h \
+ ../../lib/monitored_strategy/monitored_strategy.h \
  ../../lib/io_manager/io_manager_c_api.h \
  ../../lib/persistent_metadata/persistent_metadata.h \
  ../../lib/persistent_metadata/persistent_metadata_impl.h \
  ../../lib/volatile_metadata/volatile_metadata.h \
  ../../lib/monitored_strategy/monitored_strategy_c_api.h \
  ../../lib/network_core/network_packets.h \
- ../../lib/locking_strategy/locking_strategy.h \
- ../../lib/monitored_strategy/monitored_strategy.h open_packet_response.h \
+ ../../lib/locking_strategy/locking_strategy.h open_packet_response.h \
  write_response_packet.h read_response_packet.h close_response_packet.h \
  lseek_response_packet.h opendir_response_packet.h \
  file_storage_stat_response_packet.h mkdir_response_packet.h \

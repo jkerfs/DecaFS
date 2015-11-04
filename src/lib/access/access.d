@@ -24,14 +24,15 @@ access.o: access.cpp access.h \
  ../../lib/persistent_metadata/persistent_metadata_c_api.h \
  ../../lib/distribution_strategy/distribution_strategy.h \
  ../../lib/replication_strategy/replication_strategy.h \
- ../../lib/access/access.h ../../lib/io_manager/io_manager_c_api.h \
+ ../../lib/access/access.h \
+ ../../lib/monitored_strategy/monitored_strategy.h \
+ ../../lib/io_manager/io_manager_c_api.h \
  ../../lib/persistent_metadata/persistent_metadata.h \
  ../../lib/persistent_metadata/persistent_metadata_impl.h \
  ../../lib/volatile_metadata/volatile_metadata.h \
  ../../lib/monitored_strategy/monitored_strategy_c_api.h \
  ../../lib/network_core/network_packets.h \
  ../../lib/locking_strategy/locking_strategy.h \
- ../../lib/monitored_strategy/monitored_strategy.h \
  ../../lib/network_core/open_packet_response.h \
  ../../lib/network_core/write_response_packet.h \
  ../../lib/network_core/read_response_packet.h \

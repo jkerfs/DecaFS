@@ -5,7 +5,21 @@
 
 #include "decafs_types/file_types.h"
 #include "decafs_types/ip_address.h"
+#include <list>
 
+typedef struct WriteReq {
+  int id;
+  int fd;
+  int file_id;
+  int node_id;
+  int stripe_id;
+  int chunk_num;
+  int offset;
+  void* buf;
+  int count;
+} WriteReq;
+
+extern std::list<WriteReq> writeRequests;
 /*
  * Called during DecaFS statup process. This function needs to initiate all
  *   module-defined startup activities and register custom modules with

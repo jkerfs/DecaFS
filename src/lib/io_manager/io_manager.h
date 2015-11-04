@@ -17,6 +17,7 @@
 #include "distribution_strategy/distribution_strategy.h"
 #include "replication_strategy/replication_strategy.h"
 #include "access/access.h"
+#include "monitored_strategy/monitored_strategy.h"
 
 #define NODE_FAILURE -1
 
@@ -39,7 +40,7 @@ class IO_Manager {
 
     const char *node_metadata_filename = "io_manager_node_metadata.dat";
     const char *replica_metadata_filename = "io_manager_replica_metadata.dat";
-    
+
     // Helper Functions
     bool chunk_exists (struct file_chunk);
     bool chunk_replica_exists (struct file_chunk);
@@ -52,7 +53,7 @@ class IO_Manager {
 
   public:
     IO_Manager();
-    
+
     void init(char *metadata_path);
 
     /*
@@ -69,7 +70,7 @@ class IO_Manager {
 
     /*
      *	Translates a write request into a series of chunk writes and handles
-     *	replication. 
+     *	replication.
      *	The correct behavior of this function depends on the
      *	Distribution and Replication strategies that are in place.
      *
@@ -90,14 +91,14 @@ class IO_Manager {
                                uint32_t stripe_id, uint32_t stripe_size,
                                uint32_t chunk_size, const void *buf,
                                int offset, size_t count);
-    
+
     /*
      *   Delete all chunks and replicas for a given file.
      *
      *   @return the number of chunks that participated in the delete
      */
     uint32_t process_delete_file (uint32_t request_id, uint32_t file_id);
-    
+
     /*
      * Get information about the storage locations of chunks within a file.
      */
@@ -149,5 +150,5 @@ class IO_Manager {
      void sync();
 
 };
-    
+
 #endif

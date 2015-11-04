@@ -141,15 +141,23 @@ void IO_Manager::process_write_stripe (uint32_t request_id,
       if (write_result == NODE_FAILURE) {
         WriteChunkResponse writeResponse(request_id, 0, file_id, stripe_id, chunk_id, chunk_offset, write_size);
         write_response_handler(&writeResponse);
-        printf("THe node write failed :(");
+
+        printf("The node write failed :(");
         // Set the node to "down" and try again
         set_node_down (node_id);
       }
     }
     else {
-      printf ("%d is down :(", node_id);
+      printf ("%d is down :(\n", node_id);
       WriteChunkResponse writeResponse(request_id, 0, file_id, stripe_id, chunk_id, chunk_offset, write_size);
       write_response_handler(&writeResponse);
+
+      // Create a todo WriteRequest
+      void * temp = calloc(write_size, sizeof(uint8_t));
+      memcpy(temp, buf, write_size);
+      WriteReq req = WriteReq{request_id, 0, file_id, node_id, stripe_id, chunk_id, chunk_offset, temp, write_size};
+      writeRequests.push_back(req);
+
     }
     //else {
       // Send the write to the replica node
