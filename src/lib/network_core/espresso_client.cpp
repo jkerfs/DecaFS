@@ -3,7 +3,7 @@
 EspressoClient::EspressoClient(std::string hostname, unsigned short port, uint32_t node_id) :
   TcpClient(hostname, port), node_id(node_id)
 {
-  
+
 }
 
 void EspressoClient::connectionClosed() {
@@ -35,12 +35,12 @@ void EspressoClient::handleMessageFromServer(int socket) {
     buffer_ptr = (char*)malloc(packet_size);
     if (recv(socket, buffer_ptr, packet_size, 0) != packet_size) {
       // TODO error expected to read more bytes for a complete Packet message
-    } 
-   
+    }
+
     flag = ((uint32_t*)buffer_ptr)[2];
 
     switch (flag) {
-      case (READ_CHUNK) : 
+      case (READ_CHUNK) :
         {
           printf("\ngot a READ_CHUNK packet\n");
           ReadChunkRequest readRequest(buffer_ptr, packet_size);
@@ -49,13 +49,15 @@ void EspressoClient::handleMessageFromServer(int socket) {
           sendToServer(packet->packet, packet->packet_size);
         }
         break;
-      case (WRITE_CHUNK) : 
+      case (WRITE_CHUNK) :
         {
           printf("\ngot a WRITE_CHUNK packet\n");
           WriteChunkRequest writeRequest(buffer_ptr, packet_size);
           std::cout << writeRequest << std::endl;
           packet = process_write_packet(writeRequest);
-          sendToServer(packet->packet, packet->packet_size); 
+          printf("Packet->Packet size is %d", packet->packet_size);
+          printf("Here is the packet: %20s", (char  *)packet);
+          sendToServer(packet->packet, packet->packet_size);
         }
         break;
       case (DELETE_CHUNK) :
