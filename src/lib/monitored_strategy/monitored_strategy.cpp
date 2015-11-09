@@ -32,6 +32,7 @@ extern "C" void node_up_handler_func (uint32_t node_number) {
       printf("Write Request:\n file_id:%d \t node_id:%d\t stripe_id:%d\t chunk_num:%d\n",
         itW->file_id, itW->node_id, itW->stripe_id, itW->chunk_num);
       writeRequests.erase(itW);
+      break;
     }
     itW++;
   }
