@@ -25,13 +25,13 @@ extern "C" void node_up_handler_func (uint32_t node_number) {
   auto itW = writeRequests.begin();
   while (itW!=writeRequests.end()) {
     if(itW->node_id == node_number) {
-      process_write_chunk (itW->id, itW->fd, itW->file_id,
+      process_write_chunk (get_new_request_id(), itW->fd, itW->file_id,
                                   itW->node_id, itW->stripe_id, itW->chunk_num,
                                    itW->offset, itW->buf, itW->count);
 
       printf("Write Request:\n file_id:%d \t node_id:%d\t stripe_id:%d\t chunk_num:%d\n",
         itW->file_id, itW->node_id, itW->stripe_id, itW->chunk_num);
-        //writeRequests.erase(itW);
+      writeRequests.erase(itW);
     }
     itW++;
   }

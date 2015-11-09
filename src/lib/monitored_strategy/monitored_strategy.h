@@ -7,6 +7,7 @@
 #include "decafs_types/ip_address.h"
 #include "access/access.h"
 #include <list>
+#include "volatile_metadata/volatile_metadata_c_api.h"
 
 typedef struct WriteReq {
   int id;
