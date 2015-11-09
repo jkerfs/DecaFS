@@ -274,7 +274,7 @@ extern "C" uint32_t get_new_request_id () {
 }
 
 // ------------------------Monitored Strategy Functions-------------------------
-extern "C" void register_monitor_module (void (*monitor_module)(), 
+extern "C" void register_monitor_module (void (*monitor_module)(),
                                          struct timeval timeout) {
   printf ("(BARISTA): Registering monitor...\n");
   monitor = monitor_module;
@@ -346,7 +346,7 @@ void check_read_complete (uint32_t request_id) {
       active_read_requests[request_id].info.chunks_received) {
     int count = 0;
     uint8_t *buffer_offset = active_read_requests[request_id].buf;
-    std::map<struct file_chunk, struct read_buffer*> packet_map = 
+    std::map<struct file_chunk, struct read_buffer*> packet_map =
         active_read_requests[request_id].response_packets;
     std::map<struct file_chunk, struct read_buffer*>::iterator it = packet_map.begin();
     while (it != packet_map.end()) {
@@ -369,7 +369,7 @@ void check_read_complete (uint32_t request_id) {
 void check_write_complete (uint32_t request_id) {
   assert (write_request_exists (request_id));
   struct write_request request = write_request_lookups[request_id];
-  
+
   printf ("(BARISTA) Check write complete\n");
 
   if (active_write_requests[request].info.chunks_expected == 0) {
@@ -418,16 +418,16 @@ void check_delete_complete (uint32_t request_id) {
     if (send_remove_result (client, 0) < 0) {
       printf ("\tDelete result could not reach client.\n");
     }
-    
+
     while (delete_file_contents (file_id, client) == NO_METADATA_LOCK) {
       ; // retry metadata deletion until we succeed
     }
-    
+
     // release the lock on the file
     release_lock (client, file_id);
 
     active_delete_requests.erase (request_id);
-  
+
   }
 }
 
@@ -450,9 +450,9 @@ extern "C" void barista_core_init (int argc, char *argv[]) {
   if (ret < 0) {
     exit_failure (get_size_error_message ("chunk", argv[CHUNK_SIZE]));
   }
- 
+
   set_num_espressos (atoi(argv[NUM_ESPRESSOS]));
-  
+
   strategy_startup();
 }
 
@@ -479,7 +479,7 @@ extern "C" void open_file (const char *pathname, int flags, struct client client
   if ((decafs_file_sstat ((char *)pathname, &stat, client)) == FILE_NOT_FOUND) {
     // If we are going to write to the file, create it
     if (flags & O_RDWR) {
-      printf ("\tfile not found... creating now\n");  
+      printf ("\tfile not found... creating now\n");
       // Create the file
       struct timeval time;
       gettimeofday(&time, NULL);
@@ -501,7 +501,7 @@ extern "C" void open_file (const char *pathname, int flags, struct client client
   }
 
   printf ("\tfile %s has id %d.\n", pathname, file_id);
-  
+
   // If we're opening with read only, obtain a read lock
   if (flags & O_RDWR) {
     // if we can't get a write lock, return that the file is in use so we can't
@@ -526,7 +526,7 @@ extern "C" void open_file (const char *pathname, int flags, struct client client
     }
     printf ("\tobtained a read lock.\n");
   }
-  
+
   cursor = new_file_cursor (file_id, client);
   if (flags & O_APPEND) {
     printf ("\tfile opened with O_APPEND, moving cursor to EOF.\n");
@@ -551,14 +551,14 @@ extern "C" void read_file (int fd, size_t count, struct client client) {
   uint32_t request_id = get_new_request_id();
 
   assert (fd > 0);
-  
+
   // Allocate space for the read request
   buf = (uint8_t *)malloc (count);
 
-  inst = get_file_info((uint32_t)fd); 
-  
+  inst = get_file_info((uint32_t)fd);
+
   printf ("\n(BARISTA) Read request (%d bytes)\n", (int)count);
- 
+
   // If the client does not have permission to read, return an error
   if (has_exclusive_lock (client, inst.file_id) <= 0) {
     if (has_shared_lock (client, inst.file_id) <= 0) {
@@ -568,21 +568,21 @@ extern "C" void read_file (int fd, size_t count, struct client client) {
       return;
     }
   }
-  
+
   if (decafs_file_stat (inst.file_id, &stat, client) < 0) {
     if (send_read_result (client, 0, UNABLE_TO_STAT_FILE, NULL) < 0) {
       printf ("\tRead result could not reach client.\n");
     }
     return;
   }
-  
+
   if ((file_offset = get_file_cursor (fd)) < 0) {
     if (send_read_result (client, 0, FILE_NOT_OPEN_FOR_READ, NULL) < 0) {
       printf ("\tRead result could not reach client.\n");
     }
     return;
   }
-  
+
   // TODO: make some assertion about max read size here
   // If we are trying to read past EOF or requesting 0 bytes,
   //   return 0 bytes read
@@ -595,7 +595,7 @@ extern "C" void read_file (int fd, size_t count, struct client client) {
 
   // Save the request id.
   active_read_requests[request_id] = read_request_info (client, inst.file_id,
-                                                        fd, buf);  
+                                                        fd, buf);
   get_first_stripe (&stripe_id, &stripe_offset, stat.stripe_size,
                     file_offset);
 
@@ -608,7 +608,7 @@ extern "C" void read_file (int fd, size_t count, struct client client) {
       read_size = count - bytes_read;
     }
 
-    printf ("\t(request: %d) sending stripe (%d) information for processing (%d bytes)\n", 
+    printf ("\t(request: %d) sending stripe (%d) information for processing (%d bytes)\n",
                request_id, stripe_id, read_size);
 
     // TODO: add pathname here, get from persistent meta
@@ -623,22 +623,22 @@ extern "C" void read_file (int fd, size_t count, struct client client) {
     bytes_read += read_size;
     ++stripe_id;
   }
-  
-  assert (read_request_exists (request_id)); 
+
+  assert (read_request_exists (request_id));
   active_read_requests[request_id].info.chunks_expected = num_chunks;
   check_read_complete(request_id);
 }
 
 extern "C" void read_response_handler (ReadChunkResponse *read_response) {
   assert (read_request_exists (read_response->id));
-  
+
   struct file_chunk chunk = {read_response->file_id, read_response->stripe_id,
                              read_response->chunk_num};
-  
+
   active_read_requests[read_response->id].info.chunks_received++;
   active_read_requests[read_response->id].response_packets[chunk] =
       new read_buffer (read_response->count, read_response->data_buffer);
-  
+
   check_read_complete(read_response->id);
 }
 
@@ -657,12 +657,12 @@ extern "C" void write_file (int fd, const void *buf, size_t count, struct client
   struct write_request request = {request_id, replica_request_id};
 
   assert (fd > 0);
-  
-  inst = get_file_info((uint32_t)fd); 
+
+  inst = get_file_info((uint32_t)fd);
 
   printf ("\n(BARISTA) Write request (%d bytes) from file %d\n",
              (int)count, (int)inst.file_id);
-  
+
   // If the client does not have permission to write, return an error
   if (has_exclusive_lock (client, inst.file_id) <= 0) {
     if (send_write_result (client, 0, FILE_NOT_OPEN_FOR_WRITE) < 0) {
@@ -677,14 +677,14 @@ extern "C" void write_file (int fd, const void *buf, size_t count, struct client
     }
     return;
   }
-  
+
   if ((file_offset = get_file_cursor (fd)) < 0) {
     if (send_write_result (client, 0, FILE_NOT_OPEN_FOR_WRITE) < 0) {
       printf ("\tWrite result could not reach client.\n");
     }
     return;
   }
-  
+
   // If we are requesting 0 bytes, return 0 bytes written
   if (count == 0) {
     if (send_write_result (client, 0, 0) < 0) {
@@ -692,16 +692,16 @@ extern "C" void write_file (int fd, const void *buf, size_t count, struct client
     }
     return;
   }
-  
+
   // Save the request id
   write_request_lookups[request_id] = request;
   write_request_lookups[replica_request_id] = request;
   active_write_requests[request] = write_request_info (client, inst.file_id,
-                                                       fd);  
-  
+                                                       fd);
+
   // TODO: make some assertion about max write size here
   get_first_stripe (&stripe_id, &stripe_offset, stat.stripe_size, file_offset);
-          
+
   while (bytes_written < (int)count) {
     if (count - bytes_written > stat.stripe_size - stripe_offset) {
       write_size = stat.stripe_size - stripe_offset;
@@ -710,10 +710,10 @@ extern "C" void write_file (int fd, const void *buf, size_t count, struct client
       write_size = count - bytes_written;
     }
 
-    printf ("\t(request: (%d,%d)) sending stripe %d for processing (%d bytes)\n", 
+    printf ("\t(request: (%d,%d)) sending stripe %d for processing (%d bytes)\n",
                request_id, replica_request_id, stripe_id, write_size);
     // TODO: add pathname here, get from persistent meta
-    
+
     chunks_written = 0;
     replica_chunks_written = 0;
 
@@ -723,10 +723,10 @@ extern "C" void write_file (int fd, const void *buf, size_t count, struct client
                           stat.stripe_size, stat.chunk_size,
                           (uint8_t *)buf + bytes_written, stripe_offset,
                           write_size);
-    
+
     num_chunks += chunks_written;
     num_replica_chunks += replica_chunks_written;
-    
+
     // TODO (?): Move the file size update and cursor to check_write_complete()
     update_file_size (inst.file_id, write_size, client);
     set_file_cursor (fd, get_file_cursor (fd) + write_size, client);
@@ -734,7 +734,7 @@ extern "C" void write_file (int fd, const void *buf, size_t count, struct client
     bytes_written += write_size;
     ++stripe_id;
   }
-  assert (write_request_exists (request_id)); 
+  assert (write_request_exists (request_id));
   active_write_requests[request].info.chunks_expected = num_chunks;
   active_write_requests[request].replica_info.chunks_expected =
                                               num_replica_chunks;
@@ -742,6 +742,7 @@ extern "C" void write_file (int fd, const void *buf, size_t count, struct client
 }
 
 extern "C" void write_response_handler (WriteChunkResponse *write_response) {
+  printf ("~~~~~~~~~ Write Response id: %d", write_response->id);
   assert (write_request_exists (write_response->id));
 
   struct write_request request = write_request_lookups[write_response->id];
@@ -763,12 +764,12 @@ extern "C" void write_response_handler (WriteChunkResponse *write_response) {
 
 extern "C" void close_file (int fd, struct client client) {
   int file_id = close_file_cursor (fd, client);
-  
+
   // If we successfully closed the file, release the lock
   if (file_id > 0) {
     release_lock (client, file_id);
   }
-  
+
   if (send_close_result (client, file_id) < 0) {
     printf ("\tClose result could not reach client.\n");
   }
@@ -777,7 +778,7 @@ extern "C" void close_file (int fd, struct client client) {
 extern "C" void delete_file (char *pathname, struct client client) {
   struct decafs_file_stat file_info;
   uint32_t num_chunks = 0, request_id = get_new_request_id();
-  
+
   // If the file doesn't exist
   if ((decafs_file_sstat (pathname, &file_info, client)) < 0) {
     // TODO halli check if this change is correct
@@ -788,7 +789,7 @@ extern "C" void delete_file (char *pathname, struct client client) {
     }
     return;
   }
-  
+
   if (get_exclusive_lock (client, file_info.file_id) < 0) {
     // TODO halli check if this change is correct
     // old call
@@ -798,20 +799,20 @@ extern "C" void delete_file (char *pathname, struct client client) {
     }
     return;
   }
- 
+
   // Save the request id.
-  active_delete_requests[request_id] = request_info (client, file_info.file_id); 
+  active_delete_requests[request_id] = request_info (client, file_info.file_id);
   printf ("(request: %d) processing delete file %s\n", request_id, pathname);
   num_chunks = process_delete_file (request_id, file_info.file_id);
 
-  assert (delete_request_exists (request_id)); 
+  assert (delete_request_exists (request_id));
   active_delete_requests[request_id].chunks_expected = num_chunks;
   check_delete_complete(request_id);
 }
 
 extern "C" void delete_response_handler (DeleteChunkResponse *delete_response) {
   assert (delete_request_exists (delete_response->id));
-  
+
   active_delete_requests[delete_response->id].chunks_received++;
 
   check_delete_complete(delete_response->id);
@@ -855,7 +856,7 @@ extern "C" void file_fstat (int fd, struct stat *buf) {
 
 extern "C" void file_storage_stat (const char *path, struct client client) {
   struct decafs_file_stat file_info;
-  
+
   // If the file doesn't exist
   if ((decafs_file_sstat ((char *)path, &file_info, client)) < 0) {
     if (send_file_storage_stat_result (client, "File not found.") < 0) {
@@ -863,7 +864,7 @@ extern "C" void file_storage_stat (const char *path, struct client client) {
     }
     return;
   }
-  
+
   if (send_file_storage_stat_result(
           client, process_file_storage_stat (file_info))
           < 0) {
@@ -871,7 +872,7 @@ extern "C" void file_storage_stat (const char *path, struct client client) {
   }
 }
 
-extern "C" void move_chunk (const char* pathname, uint32_t stripe_id, uint32_t chunk_num, 
+extern "C" void move_chunk (const char* pathname, uint32_t stripe_id, uint32_t chunk_num,
                             uint32_t dest_node, struct client client) {
 
 }
@@ -881,7 +882,7 @@ extern "C" void fmove_chunk (uint32_t file_id, uint32_t stripe_id, uint32_t chun
 
 }
 
-extern "C" void move_chunk_replica (const char* pathname, uint32_t stripe_id, 
+extern "C" void move_chunk_replica (const char* pathname, uint32_t stripe_id,
                                     uint32_t chunk_num, uint32_t dest_node,
                                     struct client client) {
 
@@ -892,4 +893,3 @@ extern "C" void fmove_chunk_replica (uint32_t file_id, uint32_t stripe_id,
                                      struct client client) {
 
 }
-
