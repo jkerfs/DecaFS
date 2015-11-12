@@ -26,6 +26,8 @@ void (*node_up_handler)(uint32_t) = NULL;
 
 std::map<uint32_t, struct read_request_info> active_read_requests;
 
+std::map<uint32_t, uint32_t> replace_request_lookups;
+
 std::map<uint32_t, struct write_request> write_request_lookups;
 std::map<struct write_request, struct write_request_info> active_write_requests;
 
@@ -322,6 +324,10 @@ void get_first_stripe (uint32_t *id, int *stripe_offset, uint32_t stripe_size,
 
 bool read_request_exists (uint32_t request_id) {
   return (active_read_requests.find (request_id) != active_read_requests.end());
+}
+
+bool replace_request_exists(uint32_t request_id) {
+  return replace_request_lookups.find(request_id) != replace_request_lookups.end();
 }
 
 bool write_request_exists (uint32_t request_id) {
@@ -743,6 +749,11 @@ extern "C" void write_file (int fd, const void *buf, size_t count, struct client
 
 extern "C" void write_response_handler (WriteChunkResponse *write_response) {
   printf ("~~~~~~~~~ Write Response id: %d", write_response->id);
+  if (replace_request_exists(write_response->id)) {
+    printf("(BARISTA) Processing replacement...\n");
+    return;
+  }
+
   assert (write_request_exists (write_response->id));
 
   struct write_request request = write_request_lookups[write_response->id];

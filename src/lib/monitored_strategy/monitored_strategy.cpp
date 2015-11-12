@@ -25,7 +25,9 @@ extern "C" void node_up_handler_func (uint32_t node_number) {
   auto itW = writeRequests.begin();
   while (itW!=writeRequests.end()) {
     if(itW->node_id == node_number) {
-      process_write_chunk (get_new_request_id(), itW->fd, itW->file_id,
+      uint32_t req_id = get_new_request_id();
+      replace_request_lookups.insert(std::pair<uint32_t, uint32_t>(req_id, req_id));
+      process_write_chunk (req_id, itW->fd, itW->file_id,
                                   itW->node_id, itW->stripe_id, itW->chunk_num,
                                    itW->offset, itW->buf, itW->count);
 

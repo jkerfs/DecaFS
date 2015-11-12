@@ -22,6 +22,9 @@ typedef struct WriteReq {
 } WriteReq;
 
 extern std::list<WriteReq> writeRequests;
+
+extern std::map<uint32_t,uint32_t> replace_request_lookups;
+
 /*
  * Called during DecaFS statup process. This function needs to initiate all
  *   module-defined startup activities and register custom modules with
